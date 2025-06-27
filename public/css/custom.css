@@ -1,0 +1,23 @@
+/* 區塊 code 樣式 */
+pre,
+pre code {
+  background-color: #f5f5f5;
+  color: #333;
+  padding: 1em;
+  border-radius: 6px;
+  font-size: 0.95em;
+  overflow-x: auto;
+}
+
+/* Dark mode 對應樣式 */
+@media (prefers-color-scheme: dark) {
+  pre {
+    background-color: #2b2b2b !important;
+    color: #f8f8f2 !important;
+  }
+
+  pre code {
+    background-color: #2b2b2b !important;
+    color: #f8f8f2 !important;
+  }
+}

@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  使用 .Net Core 註冊 StackExchange.Redis 並操作 Redis Cluster on Docker · Wayne Chang&#39;s Blog
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Wayne Chang">
+<meta name="description" content="
+  Setp 1: 基本環境:
+  
+    
+    Link to heading
+  
+
+
+Windows 11
+.Net Core 8.0 Web API 專案
+NuGet packages
+
+StackExchange.Redis
+StackExchange.Redis.Extensions.AspNetCore
+StackExchange.Redis.Extensions.Core
+StackExchange.Redis.Extensions.Newtonsoft
+
+
+Docker desktop 4.41.2
+Redis 7.4
+
+
+p.s. Nuget 可能不用裝這麼多， uninstall 幾個也許還是可以 work 的，但我懶得試了XD
+
+
+  Step 2: 建立 Redis Cluster
+  
+    
+    Link to heading
+  
+
+可參考我之前的筆記: 建立 Redis cluster on Docker (Windows)
+這次的範例也會使用這份筆記內的 Redis Cluster 設定
+
+
+  Setp 3: 加入 Redis 的相關 config 到 appsetting.json 中
+  
+    
+    Link to heading
+  
+
+// some settings ...
+
+&#34;Redis&#34;: {
+  &#34;Password&#34;: &#34;mypassword&#34;,
+  &#34;Endpoints&#34;: [
+    &#34;localhost:7000&#34;,
+    &#34;localhost:7001&#34;,
+    &#34;localhost:7002&#34;,
+    &#34;localhost:7003&#34;,
+    &#34;localhost:7004&#34;,
+    &#34;localhost:7005&#34;
+  ],
+  &#34;ConnectTimeout&#34;: 5000,
+  &#34;SyncTimeout&#34;: 5000,
+  &#34;AbortOnConnectFail&#34;: false
+},
+
+// some settings ...
+Password 設定為自己的 Redis Cluster 密碼
+Endpoints 為 cluster 的 6 個 nodes，依照原本的 redis conf 內的 ip 和 yaml 內每個節點的 port 設定">
+<meta name="keywords" content="blog,developer,personal">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="使用 .Net Core 註冊 StackExchange.Redis 並操作 Redis Cluster on Docker">
+  <meta name="twitter:description" content="Setp 1: 基本環境:Link to headingWindows 11 .Net Core 8.0 Web API 專案 NuGet packages StackExchange.Redis StackExchange.Redis.Extensions.AspNetCore StackExchange.Redis.Extensions.Core StackExchange.Redis.Extensions.Newtonsoft Docker desktop 4.41.2 Redis 7.4 p.s. Nuget 可能不用裝這麼多， uninstall 幾個也許還是可以 work 的，但我懶得試了XD
+Step 2: 建立 Redis ClusterLink to heading可參考我之前的筆記: 建立 Redis cluster on Docker (Windows)
+這次的範例也會使用這份筆記內的 Redis Cluster 設定
+Setp 3: 加入 Redis 的相關 config 到 appsetting.json 中Link to heading// some settings ... &#34;Redis&#34;: { &#34;Password&#34;: &#34;mypassword&#34;, &#34;Endpoints&#34;: [ &#34;localhost:7000&#34;, &#34;localhost:7001&#34;, &#34;localhost:7002&#34;, &#34;localhost:7003&#34;, &#34;localhost:7004&#34;, &#34;localhost:7005&#34; ], &#34;ConnectTimeout&#34;: 5000, &#34;SyncTimeout&#34;: 5000, &#34;AbortOnConnectFail&#34;: false }, // some settings ... Password 設定為自己的 Redis Cluster 密碼
+Endpoints 為 cluster 的 6 個 nodes，依照原本的 redis conf 內的 ip 和 yaml 內每個節點的 port 設定">
+
+<meta property="og:url" content="http://www.example.com/posts/redis_cluster_with_dotnet/">
+  <meta property="og:site_name" content="Wayne Chang&#39;s Blog">
+  <meta property="og:title" content="使用 .Net Core 註冊 StackExchange.Redis 並操作 Redis Cluster on Docker">
+  <meta property="og:description" content="Setp 1: 基本環境:Link to headingWindows 11 .Net Core 8.0 Web API 專案 NuGet packages StackExchange.Redis StackExchange.Redis.Extensions.AspNetCore StackExchange.Redis.Extensions.Core StackExchange.Redis.Extensions.Newtonsoft Docker desktop 4.41.2 Redis 7.4 p.s. Nuget 可能不用裝這麼多， uninstall 幾個也許還是可以 work 的，但我懶得試了XD
+Step 2: 建立 Redis ClusterLink to heading可參考我之前的筆記: 建立 Redis cluster on Docker (Windows)
+這次的範例也會使用這份筆記內的 Redis Cluster 設定
+Setp 3: 加入 Redis 的相關 config 到 appsetting.json 中Link to heading// some settings ... &#34;Redis&#34;: { &#34;Password&#34;: &#34;mypassword&#34;, &#34;Endpoints&#34;: [ &#34;localhost:7000&#34;, &#34;localhost:7001&#34;, &#34;localhost:7002&#34;, &#34;localhost:7003&#34;, &#34;localhost:7004&#34;, &#34;localhost:7005&#34; ], &#34;ConnectTimeout&#34;: 5000, &#34;SyncTimeout&#34;: 5000, &#34;AbortOnConnectFail&#34;: false }, // some settings ... Password 設定為自己的 Redis Cluster 密碼
+Endpoints 為 cluster 的 6 個 nodes，依照原本的 redis conf 內的 ip 和 yaml 內每個節點的 port 設定">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-06-05T16:00:00+08:00">
+    <meta property="article:modified_time" content="2025-06-05T16:00:00+08:00">
+
+
+
+
+<link rel="canonical" href="http://www.example.com/posts/redis_cluster_with_dotnet/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.6445a802b9389c9660e1b07b724dcf5718b1065ed2d71b4eeaf981cc7cc5fc46.css" integrity="sha256-ZEWoArk4nJZg4bB7ck3PVxixBl7S1xtO6vmBzHzF/EY=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="http://www.example.com/">
+      Wayne Chang&#39;s Blog
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/projects/">Projects</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/contact/">Contact me</a>
+            </li>
+          
+        
+        
+          
+          
+          
+            
+              
+                <li class="navigation-item menu-separator">
+                  <span>|</span>
+                </li>
+                
+              
+              <li class="navigation-item">
+                <a href="/zh-hant/posts/redis_cluster_with_dotnet/">繁中</a>
+              </li>
+            
+          
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="http://www.example.com/posts/redis_cluster_with_dotnet/">
+              使用 .Net Core 註冊 StackExchange.Redis 並操作 Redis Cluster on Docker
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2025-06-05T16:00:00&#43;08:00">
+                June 5, 2025
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              4-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <h3 id="setp-1-基本環境">
+  Setp 1: 基本環境:
+  <a class="heading-link" href="#setp-1-%e5%9f%ba%e6%9c%ac%e7%92%b0%e5%a2%83">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<ol>
+<li>Windows 11</li>
+<li>.Net Core 8.0 Web API 專案</li>
+<li>NuGet packages
+<ul>
+<li>StackExchange.Redis</li>
+<li>StackExchange.Redis.Extensions.AspNetCore</li>
+<li>StackExchange.Redis.Extensions.Core</li>
+<li>StackExchange.Redis.Extensions.Newtonsoft</li>
+</ul>
+</li>
+<li>Docker desktop 4.41.2</li>
+<li>Redis 7.4</li>
+</ol>
+<br/>
+<p>p.s. Nuget 可能不用裝這麼多， uninstall 幾個也許還是可以 work 的，但我懶得試了XD</p>
+<br/>
+<h3 id="step-2-建立-redis-cluster">
+  Step 2: 建立 Redis Cluster
+  <a class="heading-link" href="#step-2-%e5%bb%ba%e7%ab%8b-redis-cluster">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>可參考我之前的筆記: <a href="/posts/redis_cluster_on_docker_on_windows/" >建立 Redis cluster on Docker (Windows)</a><br>
+這次的範例也會使用這份筆記內的 Redis Cluster 設定</p>
+<br/>
+<h3 id="setp-3-加入-redis-的相關-config-到-appsettingjson-中">
+  Setp 3: 加入 Redis 的相關 config 到 appsetting.json 中
+  <a class="heading-link" href="#setp-3-%e5%8a%a0%e5%85%a5-redis-%e7%9a%84%e7%9b%b8%e9%97%9c-config-%e5%88%b0-appsettingjson-%e4%b8%ad">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="c1">// some settings ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;Redis&#34;</span><span class="err">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;Password&#34;</span><span class="p">:</span> <span class="s2">&#34;mypassword&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;Endpoints&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;localhost:7000&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;localhost:7001&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;localhost:7002&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;localhost:7003&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;localhost:7004&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;localhost:7005&#34;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">],</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;ConnectTimeout&#34;</span><span class="p">:</span> <span class="mi">5000</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;SyncTimeout&#34;</span><span class="p">:</span> <span class="mi">5000</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;AbortOnConnectFail&#34;</span><span class="p">:</span> <span class="kc">false</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span><span class="err">,</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// some settings ...
+</span></span></span></code></pre></div><p><code>Password</code> 設定為自己的 Redis Cluster 密碼<br>
+<code>Endpoints</code> 為 cluster 的 6 個 nodes，依照原本的 redis conf 內的 ip 和 yaml 內每個節點的 port 設定</p>
+<br/>
+<h3 id="setp-4-建立-redissettingscs">
+  Setp 4: 建立 RedisSettings.cs
+  <a class="heading-link" href="#setp-4-%e5%bb%ba%e7%ab%8b-redissettingscs">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>在專案下建立 Configurations 資料夾，並在該資料夾下新增一個 RedisSettings.cs 來存放 Config 內容，column 就會依照 appsetting.json 內的設定</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C#" data-lang="C#"><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">RedisSettings</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">const</span> <span class="kt">string</span> <span class="n">SectionName</span> <span class="p">=</span> <span class="s">&#34;Redis&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string</span> <span class="n">Password</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span> <span class="p">=</span> <span class="kt">string</span><span class="p">.</span><span class="n">Empty</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">Endpoints</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">int</span> <span class="n">ConnectTimeout</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span> <span class="p">=</span> <span class="m">5000</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">int</span> <span class="n">SyncTimeout</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span> <span class="p">=</span> <span class="m">5000</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">bool</span> <span class="n">AbortOnConnectFail</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span> <span class="p">=</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><br/>
+<h3 id="setp-5-建立-servicecollectionextensionscs">
+  Setp 5: 建立 ServiceCollectionExtensions.cs
+  <a class="heading-link" href="#setp-5-%e5%bb%ba%e7%ab%8b-servicecollectionextensionscs">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>在專案下建立 Extensions 資料夾，並在該資料夾下建立 ServiceCollectionExtensions.cs，後續會在 Program.cs 來加入服務<br>
+當然也可以在 Program.cs 內直接做 AddSingleton，但用 Extension 可以增加一些異常判斷，然後看起來好像比較複雜比較厲害一點XD</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C#" data-lang="C#"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="n">IServiceCollection</span> <span class="n">AddRedis</span><span class="p">(</span><span class="k">this</span> <span class="n">IServiceCollection</span> <span class="n">services</span><span class="p">,</span> <span class="n">IConfiguration</span> <span class="n">configuration</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 使用 Configure&lt;RedisSettings&gt; 來綁定其他簡單的屬性</span>
+</span></span><span class="line"><span class="cl">    <span class="n">services</span><span class="p">.</span><span class="n">Configure</span><span class="p">&lt;</span><span class="n">RedisSettings</span><span class="p">&gt;(</span><span class="n">configuration</span><span class="p">.</span><span class="n">GetSection</span><span class="p">(</span><span class="n">RedisSettings</span><span class="p">.</span><span class="n">SectionName</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">services</span><span class="p">.</span><span class="n">AddSingleton</span><span class="p">&lt;</span><span class="n">IDatabase</span><span class="p">&gt;(</span><span class="n">serviceProvider</span> <span class="p">=&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 從配置中獲取整個 RedisSettings 對象</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">redisSettings</span> <span class="p">=</span> <span class="n">configuration</span><span class="p">.</span><span class="n">GetSection</span><span class="p">(</span><span class="n">RedisSettings</span><span class="p">.</span><span class="n">SectionName</span><span class="p">).</span><span class="n">Get</span><span class="p">&lt;</span><span class="n">RedisSettings</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">actualEndpoints</span> <span class="p">=</span> <span class="n">redisSettings</span><span class="p">.</span><span class="n">Endpoints</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 檢查是否有端點，如果沒有，則拋出異常</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(!</span><span class="n">actualEndpoints</span><span class="p">.</span><span class="n">Any</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">throw</span> <span class="k">new</span> <span class="n">InvalidOperationException</span><span class="p">(</span><span class="s">&#34;No Redis endpoints found or could not be parsed from configuration.&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 確保 password 即使為空也可用，如果設定為 null，StackExchange.Redis 可能會報錯</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">string</span> <span class="n">password</span> <span class="p">=</span> <span class="n">redisSettings</span><span class="p">?.</span><span class="n">Password</span> <span class="p">??</span> <span class="kt">string</span><span class="p">.</span><span class="n">Empty</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">configurationOptions</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ConfigurationOptions</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Password</span> <span class="p">=</span> <span class="n">password</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">ConnectTimeout</span> <span class="p">=</span> <span class="n">redisSettings</span><span class="p">?.</span><span class="n">ConnectTimeout</span> <span class="p">??</span> <span class="m">5000</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">SyncTimeout</span> <span class="p">=</span> <span class="n">redisSettings</span><span class="p">?.</span><span class="n">SyncTimeout</span> <span class="p">??</span> <span class="m">5000</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">AbortOnConnectFail</span> <span class="p">=</span> <span class="n">redisSettings</span><span class="p">?.</span><span class="n">AbortOnConnectFail</span> <span class="p">??</span> <span class="kc">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Ssl</span> <span class="p">=</span> <span class="kc">false</span><span class="p">,</span> <span class="c1">// 如果沒有使用 SSL/TLS</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">endpoint</span> <span class="k">in</span> <span class="n">actualEndpoints</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">configurationOptions</span><span class="p">.</span><span class="n">EndPoints</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">endpoint</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 執行連接</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Log</span><span class="p">.</span><span class="n">Information</span><span class="p">(</span><span class="s">&#34;Connecting to Redis with endpoints: {Endpoints}&#34;</span><span class="p">,</span> <span class="kt">string</span><span class="p">.</span><span class="n">Join</span><span class="p">(</span><span class="s">&#34;, &#34;</span><span class="p">,</span> <span class="n">actualEndpoints</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Log</span><span class="p">.</span><span class="n">Information</span><span class="p">(</span><span class="s">&#34;Using Redis password: {PasswordPresent}&#34;</span><span class="p">,</span> <span class="p">!</span><span class="kt">string</span><span class="p">.</span><span class="n">IsNullOrEmpty</span><span class="p">(</span><span class="n">password</span><span class="p">)</span> <span class="p">?</span> <span class="s">&#34;Yes&#34;</span> <span class="p">:</span> <span class="s">&#34;No&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 直接註冊 do0 對於後續使用比較方便</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ConnectionMultiplexer</span><span class="p">.</span><span class="n">Connect</span><span class="p">(</span><span class="n">configurationOptions</span><span class="p">).</span><span class="n">GetDatabase</span><span class="p">(</span><span class="m">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">services</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>接著在 Program.cs 加入服務</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C#" data-lang="C#"><span class="line"><span class="cl"><span class="n">builder</span><span class="p">.</span><span class="n">Services</span><span class="p">.</span><span class="n">AddRedis</span><span class="p">(</span><span class="n">builder</span><span class="p">.</span><span class="n">Configuration</span><span class="p">);</span>
+</span></span></code></pre></div><p>看起來如下
+<img src="/images/posts/RedisClusterWithDotnet/RedisClusterWithDotnet1.png" alt="image"></p>
+<br/>
+<h3 id="step-6-建立-iredisserviceredisservice">
+  Step 6: 建立 IRedisService、RedisService
+  <a class="heading-link" href="#step-6-%e5%bb%ba%e7%ab%8b-iredisserviceredisservice">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>在專案下建立 Services 資料夾，並在該資料夾下再建立一個 Interfaces 資料夾，接著在 Interfaces 資料夾內建立 IRedisService.cs</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C#" data-lang="C#"><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">interface</span> <span class="nc">IRedisService</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Task</span><span class="p">&lt;</span><span class="kt">string?</span><span class="p">&gt;</span> <span class="n">GetAsync</span><span class="p">(</span><span class="kt">string</span> <span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Task</span><span class="p">&lt;</span><span class="kt">bool</span><span class="p">&gt;</span> <span class="n">SetAsync</span><span class="p">(</span><span class="kt">string</span> <span class="n">key</span><span class="p">,</span> <span class="kt">string</span> <span class="k">value</span><span class="p">,</span> <span class="n">TimeSpan</span><span class="p">?</span> <span class="n">expiry</span> <span class="p">=</span> <span class="kc">null</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Task</span><span class="p">&lt;</span><span class="kt">bool</span><span class="p">&gt;</span> <span class="n">DeleteAsync</span><span class="p">(</span><span class="kt">string</span> <span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>回到上一層，在 Services 資料夾下建立 RedisService.cs，這邊就會建立針對 Redis 的操作，包含基本的 Get/Set/Delete，_logger 的部分若不需使用，也可以全部拿掉</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C#" data-lang="C#"><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">RedisService</span> <span class="p">:</span> <span class="n">IRedisService</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">readonly</span> <span class="n">IDatabase</span> <span class="n">_redisDb</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">readonly</span> <span class="n">ILogger</span><span class="p">&lt;</span><span class="n">RedisService</span><span class="p">&gt;</span> <span class="n">_logger</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">RedisService</span><span class="p">(</span><span class="n">IDatabase</span> <span class="n">redisDb</span><span class="p">,</span> <span class="n">ILogger</span><span class="p">&lt;</span><span class="n">RedisService</span><span class="p">&gt;</span> <span class="n">logger</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_redisDb</span> <span class="p">=</span> <span class="n">redisDb</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_logger</span> <span class="p">=</span> <span class="n">logger</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="kt">string?</span><span class="p">&gt;</span> <span class="n">GetAsync</span><span class="p">(</span><span class="kt">string</span> <span class="n">key</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">try</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">var</span> <span class="k">value</span> <span class="p">=</span> <span class="k">await</span> <span class="n">_redisDb</span><span class="p">.</span><span class="n">StringGetAsync</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="k">value</span><span class="p">.</span><span class="n">HasValue</span> <span class="p">?</span> <span class="k">value</span><span class="p">.</span><span class="n">ToString</span><span class="p">()</span> <span class="p">:</span> <span class="kc">null</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">ex</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">_logger</span><span class="p">.</span><span class="n">LogError</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="s">&#34;Redis GET error for key &#39;{Key}&#39;: {ErrorMessage}&#34;</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">ex</span><span class="p">.</span><span class="n">Message</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="kt">bool</span><span class="p">&gt;</span> <span class="n">SetAsync</span><span class="p">(</span><span class="kt">string</span> <span class="n">key</span><span class="p">,</span> <span class="kt">string</span> <span class="k">value</span><span class="p">,</span> <span class="n">TimeSpan</span><span class="p">?</span> <span class="n">expiry</span> <span class="p">=</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">try</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="k">await</span> <span class="n">_redisDb</span><span class="p">.</span><span class="n">StringSetAsync</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">value</span><span class="p">,</span> <span class="n">expiry</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">ex</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">_logger</span><span class="p">.</span><span class="n">LogError</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="s">&#34;Redis SET error for key &#39;{Key}&#39;: {ErrorMessage}&#34;</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">ex</span><span class="p">.</span><span class="n">Message</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="kt">bool</span><span class="p">&gt;</span> <span class="n">DeleteAsync</span><span class="p">(</span><span class="kt">string</span> <span class="n">key</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">try</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="k">await</span> <span class="n">_redisDb</span><span class="p">.</span><span class="n">KeyDeleteAsync</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">ex</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">_logger</span><span class="p">.</span><span class="n">LogError</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="s">&#34;Redis DELETE error for key &#39;{Key}&#39;: {ErrorMessage}&#34;</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">ex</span><span class="p">.</span><span class="n">Message</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>接著再回到 Program.cs 將 RedisService 注入</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C#" data-lang="C#"><span class="line"><span class="cl"><span class="n">builder</span><span class="p">.</span><span class="n">Services</span><span class="p">.</span><span class="n">AddScoped</span><span class="p">&lt;</span><span class="n">IRedisService</span><span class="p">,</span> <span class="n">RedisService</span><span class="p">&gt;();</span>
+</span></span></code></pre></div><p>這步驟完成後，包含前面的 Extension，Program.cs 新增的部分會長這樣:</p>
+<p><img src="/images/posts/RedisClusterWithDotnet/RedisClusterWithDotnet2.png" alt="image"></p>
+<br/>
+<h3 id="step-7-建立-rediscontrollercs">
+  Step 7: 建立 RedisController.cs
+  <a class="heading-link" href="#step-7-%e5%bb%ba%e7%ab%8b-rediscontrollercs">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>最後一步，在專案下的 Controller 資料夾建立 RedisController.cs，用來建立操作 Redis 的 API 服務</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C#" data-lang="C#"><span class="line"><span class="cl"><span class="na">[ApiController]</span>
+</span></span><span class="line"><span class="cl"><span class="na">[Route(&#34;api/[controller]</span><span class="s">&#34;)]
+</span></span></span><span class="line"><span class="cl"><span class="s"></span><span class="kd">public</span> <span class="k">class</span> <span class="nc">RedisController</span> <span class="p">:</span> <span class="n">ControllerBase</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">readonly</span> <span class="n">IRedisService</span> <span class="n">_redisService</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">RedisController</span><span class="p">(</span><span class="n">IRedisService</span> <span class="n">redisService</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_redisService</span> <span class="p">=</span> <span class="n">redisService</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="na">
+</span></span></span><span class="line"><span class="cl"><span class="na">    [HttpGet(&#34;{key}&#34;)]</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">ActionResult</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;&gt;</span> <span class="n">Get</span><span class="p">(</span><span class="kt">string</span> <span class="n">key</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="k">value</span> <span class="p">=</span> <span class="k">await</span> <span class="n">_redisService</span><span class="p">.</span><span class="n">GetAsync</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="k">value</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">NotFound</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">Ok</span><span class="p">(</span><span class="k">value</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="na">
+</span></span></span><span class="line"><span class="cl"><span class="na">    [HttpPost(&#34;{key}&#34;)]</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">ActionResult</span><span class="p">&gt;</span> <span class="n">Set</span><span class="p">(</span><span class="kt">string</span> <span class="n">key</span><span class="p">,</span> <span class="kt">string</span> <span class="k">value</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">success</span> <span class="p">=</span> <span class="k">await</span> <span class="n">_redisService</span><span class="p">.</span><span class="n">SetAsync</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">value</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(!</span><span class="n">success</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">StatusCode</span><span class="p">(</span><span class="m">500</span><span class="p">,</span> <span class="s">&#34;Failed to set value&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">Ok</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="na">
+</span></span></span><span class="line"><span class="cl"><span class="na">    [HttpPost(&#34;{key}/expire&#34;)]</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">ActionResult</span><span class="p">&gt;</span> <span class="n">SetWithExpiry</span><span class="p">(</span><span class="kt">string</span> <span class="n">key</span><span class="p">,</span> <span class="kt">string</span> <span class="n">Value</span><span class="p">,</span> <span class="kt">int</span> <span class="n">ExpirySeconds</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">expiry</span> <span class="p">=</span> <span class="n">TimeSpan</span><span class="p">.</span><span class="n">FromSeconds</span><span class="p">(</span><span class="n">ExpirySeconds</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">success</span> <span class="p">=</span> <span class="k">await</span> <span class="n">_redisService</span><span class="p">.</span><span class="n">SetAsync</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Value</span><span class="p">,</span> <span class="n">expiry</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(!</span><span class="n">success</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">StatusCode</span><span class="p">(</span><span class="m">500</span><span class="p">,</span> <span class="s">&#34;Failed to set value&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">Ok</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="na">
+</span></span></span><span class="line"><span class="cl"><span class="na">    [HttpDelete(&#34;{key}&#34;)]</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">ActionResult</span><span class="p">&gt;</span> <span class="n">Delete</span><span class="p">(</span><span class="kt">string</span> <span class="n">key</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">success</span> <span class="p">=</span> <span class="k">await</span> <span class="n">_redisService</span><span class="p">.</span><span class="n">DeleteAsync</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">Ok</span><span class="p">(</span><span class="k">new</span> <span class="p">{</span> <span class="n">Deleted</span> <span class="p">=</span> <span class="n">success</span> <span class="p">});</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><br/>
+<p>最後的資料夾結構如下</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="l">RedisTest/</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">├── ...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">├── Configurations/</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">│ └── RedisSettings.cs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">├── Controllers/</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">│ └── RedisController.cs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">├── Extensions/</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">│ └── ServiceCollectionExtensions.cs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">├── Services/</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">│ ├── Interfaces/</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">│ │ └── IRedisService.cs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">│ └── RedisService.cs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">├── appsettings.json</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">└── Program.cs</span><span class="w">
+</span></span></span></code></pre></div><p><img src="/images/posts/RedisClusterWithDotnet/RedisClusterWithDotnet3.png" alt="image"></p>
+<br/>
+<h3 id="step-8-執行測試">
+  Step 8: 執行測試
+  <a class="heading-link" href="#step-8-%e5%9f%b7%e8%a1%8c%e6%b8%ac%e8%a9%a6">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>終於可以執行了，直接按 F5 來執行專案，可以看到 Swagger UI<br>
+(我不小心把 Test 寫成 Text 了&hellip; 請忽略這個不重要的小細節^^)</p>
+<p><img src="/images/posts/RedisClusterWithDotnet/RedisClusterWithDotnet4.png" alt="image"></p>
+<p>來操作 Post 看看，點開 Post 並點右上方的 Try it out，接著輸入要設定的 key, value，得到 Response Code 200，看來有執行成功</p>
+<p><img src="/images/posts/RedisClusterWithDotnet/RedisClusterWithDotnet5.png" alt="image"></p>
+<p>再來試試看 Get，輸入我們剛剛設定的 key 看看能不能拿到一樣的 value</p>
+<p><img src="/images/posts/RedisClusterWithDotnet/RedisClusterWithDotnet6.png" alt="image"></p>
+<p>結果也是成功的~完成!</p>
+<br/>
+<h3 id="程式碼範例">
+  程式碼範例
+  <a class="heading-link" href="#%e7%a8%8b%e5%bc%8f%e7%a2%bc%e7%af%84%e4%be%8b">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Github: <a href="https://github.com/AnnChangAnn/Redis_Cluster_with_Dotnet"  class="external-link" target="_blank" rel="noopener">Redis_Cluster_with_Dotnet </a></p>
+<br/>
+<h3 id="總結">
+  總結
+  <a class="heading-link" href="#%e7%b8%bd%e7%b5%90">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>網路上找到的資料並沒有設定地這麼複雜，比較多是只用一行的 Redis Config 和一行的AddSingleton 直接完成註冊，但這樣 appsetting 會比較不好看一點。<br>
+這次利用 AI 同步調整和測試，將 config 寫得整齊一點，並且透過 Extension 增加一些判定來讓整個架構更完整，所以說~善用 AI 工具真的很重要XD</p>
+<br/>
+<br/>
+<h3 id="參考來源">
+  參考來源:
+  <a class="heading-link" href="#%e5%8f%83%e8%80%83%e4%be%86%e6%ba%90">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<ol>
+<li><a href="/posts/redis_cluster_on_docker_on_windows/" >建立 Redis cluster on Docker (Windows)</a></li>
+<li><a href="https://blog.yowko.com/stackexchange-redis-in-aspdotnet-core/"  class="external-link" target="_blank" rel="noopener">https://blog.yowko.com/stackexchange-redis-in-aspdotnet-core/</a></li>
+<li>ChatGPT, Claude, Gemini</li>
+</ol>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2025
+     Wayne Chang 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>
