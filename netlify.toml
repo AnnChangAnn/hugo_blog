@@ -1,0 +1,8 @@
+# 部署時執行的指令，--minify壓縮HTML，--gc自動在建置後刪除快取檔案
+[build]
+  publish = "public"
+  command = "hugo --gc --minify"
+
+# 指定Hugo版本，應與本機安裝的Hugo版本一致
+[context.production.environment]
+  HUGO_VERSION = "0.147.9"
