@@ -1,4 +1,4 @@
-baseURL = "http://www.wayne-chang.space"
+baseURL = "http://wayne-chang.space"
 title = "Wayne Chang's Blog"
 theme = "hugo-coder"
 languageCode = "en"
