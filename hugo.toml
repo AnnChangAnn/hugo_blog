@@ -1,5 +1,5 @@
 baseURL = "https://wayne-chang.space"
-title = "Wayne Chang's Blog"
+title = "Wayne Chang's Space"
 theme = "hugo-coder"
 languageCode = "en"
 defaultContentLanguage = "en"
@@ -203,7 +203,7 @@ url = "contact/"
 
 [languages.zh-hant]
 languageName = "繁中"
-title = "Wayne Chang 的小筆記"
+title = "Wayne Chang 的小小空間"
 
 [languages.zh-hant.params]
 author = "Wayne Chang"
