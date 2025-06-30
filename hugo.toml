@@ -26,7 +26,7 @@ unsafe = true
 author = "Wayne Chang"
 # license = '<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA-4.0</a>'
 description = "Wayne Chang's personal website"
-keywords = "blog, developer, personal, software, engineering, programming, tech, Wayne Chang"
+keywords = "blog, developer, personal, software, engineering, programming, tech, Wayne Chang, Wayne Chang website"
 info = ["Software Development Engineer", "Learning bits, writing bits, and getting random ideas 😏"]
 avatarURL = "images/avatar.jpg"
 #gravatar = "fatan19928@gmail.com"
@@ -208,7 +208,7 @@ title = "Wayne Chang 的小小空間"
 [languages.zh-hant.params]
 author = "Wayne Chang"
 description = "Wayne Chang 的個人網頁"
-keywords = "軟體, 部落格, 開發者, 軟體工程, 程式設計, 技術, Wayne Chang, .Net, Python, Redis, Docker, 演算法, 資料結構"
+keywords = "軟體, 部落格, 開發者, 軟體工程, 程式設計, 技術, Wayne Chang, .Net, Python, Redis, Docker, 演算法, 資料結構, Wayne Chang website"
 info = ["Software Development Engineer", "偶爾學點什麼，偶爾寫點什麼，偶爾會有些突發奇想😏"]
 
 [[languages.zh-hant.menu.main]]
