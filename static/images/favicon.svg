@@ -1,13 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 15.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 width="32px" height="32px" viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve">
-<g>
-	<rect x="4.686" y="4.686" transform="matrix(0.7071 0.7071 -0.7071 0.7071 16 -6.6274)" fill="#000000" width="22.627" height="22.627"/>
-	<polygon fill="#FFFFFF" points="29.403,16 21.874,23.529 21.874,20.472 26.346,16 21.874,11.528 21.874,8.471 	"/>
-	<polygon fill="#FFFFFF" points="19.811,9.464 19.811,14.71 12.166,14.71 12.166,9.488 16,5.654 	"/>
-	<polygon fill="#FFFFFF" points="19.811,16.492 19.811,22.535 16,26.346 12.166,22.512 12.166,16.492 	"/>
-	<polygon fill="#FFFFFF" points="10.126,11.528 5.654,16 10.126,20.472 10.126,23.529 2.597,16 10.126,8.471 	"/>
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
+ "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+ width="32.000000pt" height="32.000000pt" viewBox="0 0 32.000000 32.000000"
+ preserveAspectRatio="xMidYMid meet">
+
+<g transform="translate(0.000000,32.000000) scale(0.100000,-0.100000)"
+fill="#000000" stroke="none">
+<path d="M52 300 c-29 -12 -42 -48 -42 -116 0 -54 12 -92 34 -106 6 -4 59 -8
+118 -8 141 0 155 14 146 141 -6 86 -17 93 -136 96 -53 2 -107 -2 -120 -7z
+m118 -85 c0 -11 -12 -15 -50 -15 -38 0 -50 4 -50 15 0 11 12 15 50 15 38 0 50
+-4 50 -15z m80 -55 c0 -6 -37 -10 -90 -10 -53 0 -90 4 -90 10 0 6 37 10 90 10
+53 0 90 -4 90 -10z"/>
+<path d="M70 25 c0 -12 17 -15 90 -15 73 0 90 3 90 15 0 12 -17 15 -90 15 -73
+0 -90 -3 -90 -15z"/>
 </g>
 </svg>
