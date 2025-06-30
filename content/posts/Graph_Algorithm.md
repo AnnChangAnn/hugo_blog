@@ -2,6 +2,9 @@
 title: "解題：Graph 資料結構與演算法"
 date: 2025-06-26T16:30:00+08:00
 draft: false
+keywords: ["Graph", "Algorithm", "BFS", "Dijkstra", "Bellman-Ford", "Floyd-Warshall", "LeetCode", "演算法", "資料結構"]
+description: "本文深入探討了在解決 LeetCode 或面試問題時，如何根據圖的特性（如權重、負環）選擇最適合的最短路徑演算法。內容涵蓋了 BFS、0-1 BFS、Dijkstra、Bellman-Ford 及 Floyd-Warshall 演算法的原理、適用場景，並提供 Python 程式碼範例與時間/空間複雜度分析，幫助您快速掌握圖論解題的關鍵。"
+images: ["/images/favicon.svg"]
 ---
 
 

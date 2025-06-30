@@ -2,6 +2,9 @@
 title: "解題：透過 Constraints 來判斷可接受的時間與空間複雜度"
 date: 2025-06-15T15:00:00+08:00
 draft: false
+keywords: ["Time Complexity", "Space Complexity", "Big O Notation", "Algorithm", "Data Structure", "LeetCode", "演算法", "資料結構"]
+description: "本文深入探討了演算法中的時間複雜度與空間複雜度，並介紹了 Big O Notation 的概念與常見表示法。文章特別強調在 LeetCode 等解題平台中，如何透過題目給定的 Constraints 來判斷可接受的演算法複雜度，並歸納了不同輸入大小下，適合使用的演算法類型，幫助讀者更有效率地解題。"
+images: ["/images/favicon.svg"]
 ---
 
 

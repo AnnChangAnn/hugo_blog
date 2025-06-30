@@ -2,6 +2,9 @@
 title: "安裝 Docker on Windows，並在 Docker 上執行 Redis"
 date: 2025-05-04T17:00:00+08:00
 draft: false
+keywords: ["Docker", "Windows", "Redis", "WSL", "安裝", "教學"]
+description: "本篇教學將引導您如何在 Windows 作業系統上，從零開始下載並安裝 Docker Desktop，並解決常見的 WSL 更新問題。接著，我們將示範如何透過 Docker 指令拉取最新的 Redis 映像檔，並成功在本機端啟動一個 Redis 容器，最後包含進入容器內操作 Redis CLI 的基本指令。"
+images: ["/images/favicon.svg"]
 ---
 
 

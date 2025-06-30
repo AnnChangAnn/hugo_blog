@@ -2,6 +2,9 @@
 title: "建立 Redis cluster on Docker (Windows)"
 date: 2025-05-15T17:00:00+08:00
 draft: false
+keywords: ["Redis", "Redis Cluster", "Docker", "Docker Compose", "Windows", "資料庫", "教學"]
+description: "本篇教學提供在 Windows 環境下，使用 Docker 和 Docker Compose 建立一個包含 6 個節點（3 主 3 從）的 Redis Cluster 的完整步驟。內容涵蓋了 Dockerfile、rediscluster.conf 以及 docker-compose.yml 的詳細設定，並提供指令來啟動、驗證、關閉及移除整個叢集，適合想在本地端快速架設 Redis 高可用性環境的開發者。"
+images: ["/images/favicon.svg"]
 ---
 
 

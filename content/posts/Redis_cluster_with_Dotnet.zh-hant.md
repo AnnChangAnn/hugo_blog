@@ -2,6 +2,9 @@
 title: "使用 .Net Core 註冊 StackExchange.Redis 並操作 Redis Cluster on Docker"
 date: 2025-06-05T16:00:00+08:00
 draft: false
+keywords: [".Net Core", "Redis", "Redis Cluster", "StackExchange.Redis", "Docker", "Web API", "教學"]
+description: "本篇教學詳細介紹如何在 .Net Core Web API 專案中，整合 StackExchange.Redis 函式庫來操作 Redis Cluster。內容涵蓋了 Redis 設定檔的配置、服務註冊的擴充方法、Redis 服務介面與實作，以及透過 API 控制器進行 Redis 資料的 Get/Set/Delete 操作。文章也提供了完整的程式碼範例與測試步驟，幫助開發者快速上手。"
+images: ["/images/favicon.svg"]
 ---
 
 
