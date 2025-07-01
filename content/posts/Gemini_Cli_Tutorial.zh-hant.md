@@ -7,7 +7,7 @@ description: "本文介紹如何安裝與使用 Google Gemini CLI，教你如何
 images: ["/images/favicon.svg"]
 ---
 
-# 在小黑框上玩 AI : 手把手帶你安裝 Google Gemini CLI !
+
 
 聽說最近 Gemini CLI 很夯，小弟我這兩天也試了一下覺得蠻好用的  
 輸入一些 prompt 就可以讓他直接在我的電腦上完成我要的檔案了，真的很方便~
