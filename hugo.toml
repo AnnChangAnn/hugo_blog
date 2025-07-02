@@ -136,6 +136,11 @@ id = "G-1P4DNW7W4H"
 # # connect-src directive – defines valid targets for to XMLHttpRequest (AJAX), WebSockets or EventSource
 # connectsrc = ["'self'", "https://www.google-analytics.com"]
 
+[sitemap]
+  changefreq = "monthly"
+  priority = 0.5
+  filename = "sitemap.xml"
+  
 [taxonomies]
 category = "categories"
 series = "series"
