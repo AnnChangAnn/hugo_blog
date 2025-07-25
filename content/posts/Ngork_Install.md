@@ -25,6 +25,7 @@ images: ["/images/favicon.svg"]
 
 ### Setp 2: ngork 設定
 依照 ngrok 網站上的步驟操作，在 ngrok.exe 開啟的 Command Line 畫面上執行 add-authtoken 指令:  
+
 ``` ngrok config add-authtoken XXXXXXXXXXX ```  
 
 ![image](/images/posts/ngork/ngork3.png)  
