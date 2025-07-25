@@ -13,17 +13,22 @@ images: ["/images/favicon.svg"]
 <br/>
 
 ### Setp 1: 註冊並下載 [ngrok](https://ngrok.com/)  
-點選 Sign up 註冊
+點選 Sign up 註冊  
+
 ![image](/images/posts/ngork/ngork1.png)  
 
 註冊完成後，依照 ngrok 網站上的步驟操作，執行下載的 ngrok.exe  
+
 ![image](/images/posts/ngork/ngork2.png)  
 
 <br/>
 
 ### Setp 2: ngork 設定
-依照 ngrok 網站上的步驟操作，在 ngrok.exe 開啟的 Command Line 畫面上執行 add-authtoken 指令: ``` ngrok config add-authtoken XXXXXXXXXXX ```  
+依照 ngrok 網站上的步驟操作，在 ngrok.exe 開啟的 Command Line 畫面上執行 add-authtoken 指令:  
+``` ngrok config add-authtoken XXXXXXXXXXX ```  
+
 ![image](/images/posts/ngork/ngork3.png)  
+
 ![image](/images/posts/ngork/ngork4.png)  
 
     
@@ -31,6 +36,7 @@ images: ["/images/favicon.svg"]
 
 ### Setp 3: 執行 ngork，讓外部裝置來使用本地服務
 執行 ngork，若你使用的是 http，則執行: ```ngrok http http://localhost:8080```  
+
 ![image](/images/posts/ngork/ngork5.png)  
 
 執行後會顯示如下:  
@@ -42,11 +48,15 @@ Forwarding 後面的 url 就是讓外部裝置可以直接開啟本機服務的 
 
 <br/>
 
-若是 https，則執行: ```ngrok http https://localhost:443 --host-header=localhost:443```  
+若是 https，則執行:  
+
+```ngrok http https://localhost:443 --host-header=localhost:443```  
 
 ![image](/images/posts/ngork/ngork7.png)  
 
-P.S. 若有自行設定的 port，則也需做調整
+<br/>
+
+P.S. 若有自行設定的 port，則也需做調整  
 
 
 
