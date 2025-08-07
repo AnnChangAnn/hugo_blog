@@ -395,7 +395,7 @@ spec:
 但如果你只是做個測試，想必是玩完就該關掉了，不然下個月收到帳單可能會有點難過><  
 
 如果你還想留著 GKE cluster，則可以執行以下 3 個指令  
-```
+```bash
 kubectl delete deployment hello-node
 kubectl delete service hello-node-service
 kubectl delete ingress hello-node-ingress
