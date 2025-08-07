@@ -8,15 +8,27 @@ description: "本文教你如何從 0 開始部署一個 Google Kubernetes Engin
 images: ["/images/favicon.svg"]
 ---
 
-本文教你如何從 0 開始部署一個 Google Kubernetes Engine（GKE）應用，由建立一個基本的網頁開始，後續包括建立 Cluster、撰寫 Dockerfile、上傳 Artifact Registry、設定 Ingress 與 HTTPS 憑證，最後完整刪除所有資源。適合 GCP 初學者與 DevOps 工程師參考的實戰指南。  
+
+> 本文教你如何從 0 開始部署一個 Google Kubernetes Engine（GKE）應  用，由建立一個基本的網頁開始，後續包括建立 Cluster、撰寫 Dockerfile、上傳 Artifact Registry、設定 Ingress 與 HTTPS 憑證，最後完整刪除所有資源。適合 GCP 初學者與 DevOps 工程師參考的實戰指南。  
+
+<br/>
+
+嗨，我是 Wayne！  
+
+一開始我只是想嘗試把一個小網站部署到 Google Cloud，結果發現這裡面牽涉的步驟比想像中多一些，但每一步都是清楚而有邏輯的。於是我決定邊做邊記，把整個過程記錄下來，也幫有興趣入門 GKE 的人省下不少查資料的時間。  
+
+不管你是剛接觸容器部署，還是只是想對 GCP 更熟一點，希望這篇能成為你動手實作的好起點。  
 
 <br/>
 
 ### Step 1: 建立一個簡單的node.js App  
 首先進到 Google Cloud 頁面，點選右上方的 Cloud Shell  
+
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide1.png)  
 
+
 接著網頁下方會開啟終端機畫面，並且終端機的分頁名稱就是你的 project ID  
+
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide2.png)  
 
 先來建立一個簡單的網頁吧!  
@@ -30,10 +42,13 @@ var handleRequest = function(request, response) {
 var www = http.createServer(handleRequest);
 www.listen(8080);
 ```
+
 接著按下 ```Esc```，輸入 ```:wq``` 儲存並離開  
 
 可以先試著預覽網頁看看，輸入 ```node server.js``` 並點選預覽，可看到網頁畫面  
+
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide3.png)  
+
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide4.png)  
 
 
@@ -49,6 +64,7 @@ EXPOSE 8080
 COPY server.js .
 CMD node server.js
 ```
+
 一樣 ```Esc```、```:wq``` 儲存並離開  
 此時我們已經有 server.js、Dockerfile 兩個檔案了，可以準備將其打包成 image 並放上 Artifact Registry 了  
 
@@ -57,16 +73,20 @@ CMD node server.js
 ### Step 3: 建立一個 Artifact Registry 存放區  
 
 我們直接搜尋 Artifact Registry，找到他並點進去  
+
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide5.png)  
 
 可以釘選他以後方便維護  
+
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide6.png)  
 
 點選 "建立存放區"  
+
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide7.png)  
 
 輸入名稱，格式選擇 Docker，區域選擇台灣，按下建立後即可看到我們所建立的存放區  
 這邊先建立一個名稱為 "hello-node" 的存放區  
+
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide8.png)  
 
 
@@ -88,19 +108,24 @@ CMD node server.js
 ### Step 5: 建立 Docker image  
 
 在同樣的存放區畫面上，點選 "複製路徑"  
+
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide11.png)  
 
 再加上我們自行設定的 image 名稱和版本(tag)，即可組成 image的完整路徑  
+
 ```asia-east1-docker.pkg.dev/{my-project-id}/hello-node/{image_name}:{tag}```  
 
 以我的 image 為例，完整路徑大概會長這樣:  
+
 ```asia-east1-docker.pkg.dev/my-project-id/hello-node/hello-node:v1```  
 
 接著將他組成指令，並於 Cloud Shell 上執行  
 (注意! 指令最後面有個 ```.``` 是不可缺少的喔)  
+
 ```docker build -t asia-east1-docker.pkg.dev/{my-project-id}/hello-node/hello-node:v1 . ```  
 
 等他跑一段時間，可以看到他成功的 build 起來了  
+
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide12.png)  
   
   
@@ -110,12 +135,15 @@ CMD node server.js
   
 要確認我們 build 的 image 是否可以正常運作，當然是讓他跑起來看看囉!  
 剛剛已經有 image 的完整路徑了，要執行的指令大致如下:  
+
 ```docker run -d -p [port]:[port] {image 完整路徑}```  
 
 以我的為例，就會是  
+
 ```docker run -d -p 8080:8080 asia-east1-docker.pkg.dev/my-project-id/hello-node/hello-node:v1```  
 
 執行完後，我們一樣可以預覽網頁看看  
+
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide13.png)  
 
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide14.png)  
@@ -152,12 +180,15 @@ gcloud container clusters create hello-cluster \
 這邊我建立了兩個 nodes，並使用標準磁碟 (pd-standard) 而不是 SSD (pd-ssd)，對於我們要建立的小型測試來說已經足夠了，也不會佔用到我們 SSD 的配額  
 
 等待幾分鐘後就建立完成了，可以看到建立後的相關資訊  
+
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide18.png)  
 
 我們也可以用指令來查看 cluster 內的 nodes  
+
 ```gcloud compute instances list | grep gke ```  
 
 接著執行指令來取得 cluster 認證  
+
 ```gcloud container clusters get-credentials hello-cluster --zone asia-east1```  
 
 
@@ -167,6 +198,7 @@ gcloud container clusters create hello-cluster \
 
 接下來就是建立各個 YAML 檔來部屬資源了  
 這裡我們會建立 3 個 YAML 檔，分別是  
+
 - deployment.yaml : 定義要部屬的 pod
 - service.yaml : 建立服務並提供統一入口
 - ingress.yaml : 建立 Load Balance 並提供對外入口
@@ -242,7 +274,8 @@ spec:
 ### Step 9: 部屬所有資源以及建立 Domain  
 
 終於到了部屬資源的環節了，分別執行以下三個指令來部屬我們剛剛建立的 YAML 資源  
-```
+
+```bash
 kubectl apply -f deployment.yaml  
 kubectl apply -f service.yaml  
 kubectl apply -f ingress.yaml   
@@ -251,11 +284,13 @@ kubectl apply -f ingress.yaml
 接下來需要等幾分鐘才拿得到我們的 External IP  
 這時可以先來申請個免費的 domain，我們使用 DuckDNS 來申請  
 進入 [DuckDNS](https://www.duckdns.org/)  
+
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide19.png)  
 
 上面有各種登入方式，登入後可以輸入自己想要的 domain name  
 譬如我這裡輸入 "hello-node-test"  
 按下 "add domain"，就會出現我們剛剛設定好的 domain 以及目前 domain 的 IP  
+
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide20.png)  
 
 
@@ -264,6 +299,7 @@ kubectl apply -f ingress.yaml
 ### Step 10: 連結 External IP  
 
 隔幾分鐘後，來查一下我們的 External IP  
+
 ```kubectl get ingress hello-node-ingress```  
 
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide21.png)  
@@ -273,6 +309,7 @@ kubectl apply -f ingress.yaml
 接著回到 DuckDNS 上，將 domain 後面的 current ip 更新成我們剛剛拿到的 External IP  
 最後開啟我們的 domain，譬如我的是：http://hello-node-test.duckdns.org/  
 就可以成功看到我們的網站了!  
+
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide22.png)  
 
 
@@ -297,9 +334,11 @@ spec:
 ```
 
 儲存好後，執行  
+
 ```kubectl apply -f certificate.yaml```  
 
 可以使用以下指令看看是否建立成功  
+
 ```kubectl get managedcertificate hello-cert```  
 
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide23.png)  
@@ -331,16 +370,20 @@ spec:
 ```
 
 修改完成後，執行  
+
 ```kubectl apply -f ingress.yaml```  
 
 這邊可能要等個 5~15 分鐘等待憑證生效，我們可以用指令查詢  
+
 ```kubectl describe managedcertificate hello-cert```  
 
 當憑證準備完成時，你會看到狀態為 Active  
+
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide24.png)  
 
 這時我們就可以再回到我們的網頁了  
 這次輸入 ```https://{domain}``` 就不會再顯示是不安全的網頁了!  
+
 ![image](/images/posts/GKECompletePracticalGuide/GKE_Practical_Guide25.png)  
 
 
@@ -378,7 +421,9 @@ kubectl delete ingress hello-node-ingress
 <br/>
 
 ### 總結
-對於初次嘗試 k8s 相關操作的我來說，這次在 GKE 上使用算是蠻複雜的，而且網路上不少操作說明都可能只做某一些部分，或是因為 Google 政策上的調整，有些作法或指令已無法再使用。還有部分指令等待的時間蠻久的，讓我懷疑我到底有沒有做對 哈哈！ 透過這次完整的紀錄下建立 GKE 的過程和步驟，自己也更了解每個步驟在做什麼，也希望能幫助到看到這裡的你😊
+走完這一輪，你應該已經能夠從一個空專案，一步步地部署到 GKE，並透過 HTTPS 正式公開對外服務。這篇文章除了讓你知道 "怎麼做"，也希望能了解每一步 "為什麼這樣做"，以及每個元件在整個架構中的角色。
+
+當然，這只是 GKE 的入門實戰，其他的內容像是 CI/CD、自動調整資源、監控與日誌等，也許我也會再慢慢補上吧...？😊
 
 
 <br/>
