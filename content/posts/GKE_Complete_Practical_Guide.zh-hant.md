@@ -171,7 +171,7 @@ CMD node server.js
 ### Step 7: 建立 GKE Cluster  
 
 輸入指令來建立 GKE Cluster  
-```
+```bash
 gcloud container clusters create hello-cluster \
   --zone asia-east1 \
   --num-nodes=2 \
